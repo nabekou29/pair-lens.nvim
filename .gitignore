@@ -1,0 +1,20 @@
+# Lua
+*.o
+*.so
+*.dll
+
+# Neovim
+.netrwhist
+
+# Dependencies
+/node_modules
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
