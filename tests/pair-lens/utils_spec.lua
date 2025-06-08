@@ -71,7 +71,7 @@ describe("utils", function()
 
   describe("should_show_lens", function()
     it("should return false for small blocks", function()
-      local node_info = { total_lines = 3 }
+      local node_info = { line_count = 3 }
       local config = { min_lines = 5 }
 
       assert.is_false(utils.should_show_lens(node_info, config))
@@ -81,7 +81,7 @@ describe("utils", function()
       local buf = helper.create_test_buffer("line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10\nline11\nline12\nline13\nline14\nline15\nline16\nline17\nline18\nline19\nline20")
       
       local node_info = {
-        total_lines = 10,
+        line_count = 10,
         start_line = 1,
         end_line = 10,
       }
