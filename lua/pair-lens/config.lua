@@ -11,6 +11,8 @@ M.defaults = {
   custom_queries = {},
 }
 
+---@param opts? PairLensConfig
+---@return PairLensConfig
 function M.setup(opts)
   local config = vim.tbl_deep_extend("force", M.defaults, opts or {})
 
@@ -22,6 +24,8 @@ function M.setup(opts)
   return config
 end
 
+---@param config any
+---@return boolean
 function M.validate(config)
   if type(config) ~= "table" then
     return false
@@ -58,6 +62,7 @@ function M.validate(config)
   return true
 end
 
+---@return PairLensConfig
 function M.get()
   return M.options or M.defaults
 end
@@ -66,6 +71,8 @@ function M.is_enabled()
   return M.get().enabled
 end
 
+---@param filetype string
+---@return boolean
 function M.is_filetype_disabled(filetype)
   local disabled_filetypes = M.get().disable_filetypes
   return vim.tbl_contains(disabled_filetypes, filetype)
