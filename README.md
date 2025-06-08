@@ -1,26 +1,28 @@
 # pair-lens.nvim
 
+[日本語](README.ja.md) | **English**
+
 [![Lua](https://img.shields.io/badge/Lua-blue.svg?style=for-the-badge&logo=lua)](http://www.lua.org)
 [![Neovim](https://img.shields.io/badge/Neovim%200.8+-green.svg?style=for-the-badge&logo=neovim)](https://neovim.io)
 
-ブロック構造の終端（`end` など）に、対応する開始位置の情報を表示する Neovim プラグインです。
+A Neovim plugin that displays information about the corresponding start position at the end of block structures (such as `end`).
 
 ![Demo](./demo.gif)
 
-## 特徴
+## Features
 
-- 多言語対応
+- Multi-language support
   - Lua: `if ... then ... end`, `do ... end`, `function ... end`
   - Ruby: `if ... end`, `def ... end`, `do ... end`, `class ... end`
   - Python: `def`, `class`, `if`, `for`, `while`, `try`, `with`
-  - JavaScript/TypeScript: 関数、クラス、メソッド、制御構文
-  - Rust: 関数、impl、構造体、enum、trait、制御構文
-  - Go: 関数、メソッド、型定義、制御構文
-- Tree-sitter を使用した正確な構文解析
-- 軽量で高速な動作
-- カスタマイズ可能な表示スタイル
+  - JavaScript/TypeScript: functions, classes, methods, control structures
+  - Rust: functions, impl, structs, enums, traits, control structures
+  - Go: functions, methods, type definitions, control structures
+- Accurate syntax parsing using Tree-sitter
+- Lightweight and fast operation
+- Customizable display styles
 
-## インストール
+## Installation
 
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
 
@@ -51,47 +53,47 @@ use {
 }
 ```
 
-## 設定
+## Configuration
 
 ```lua
 require("pair-lens").setup({
-  -- デフォルト設定
+  -- Default configuration
   enabled = true,
   style = {
-    -- 表示フォーマット
-    -- {sl} / {start_line}: 開始位置の行番号
-    -- {el} / {end_line}: 終了位置の行番号
-    -- {st} / {start_text}: 開始位置の文字列
-    -- {et} / {end_text}: 終了位置の文字列
-    -- {lc} / {line_count}: ブロックの行数
+    -- Display format
+    -- {sl} / {start_line}: Start position line number
+    -- {el} / {end_line}: End position line number
+    -- {st} / {start_text}: Start position text
+    -- {et} / {end_text}: End position text
+    -- {lc} / {line_count}: Number of lines in the block
     format = "󰶢 (:{start_line}-{end_line}) {start_text}",
-    -- ハイライトグループ
+    -- Highlight group
     hl = "PairLensVirtualText",
   },
-  -- 無効にするファイルタイプ
+  -- Disabled file types
   disable_filetypes = {},
-  -- カスタムクエリ（Tree-sitterクエリをオーバーライド）
+  -- Custom queries (override Tree-sitter queries)
   custom_queries = {
-    -- 例: Luaのカスタムクエリ
+    -- Example: Custom query for Lua
     -- lua = [[
     --   (function_definition) @function
     --   (if_statement) @if
     -- ]],
   },
-  -- 表示する最小行数（デフォルト: 5）
-  -- 開始位置から終了位置までの行数がこの値未満の場合は表示しません
+  -- Minimum number of lines to display (default: 5)
+  -- Virtual text will not be displayed if the number of lines from start to end is less than this value
   min_lines = 6,
 })
 ```
 
-### 高度なカスタマイズ
+### Advanced Customization
 
-format フィールドには関数も指定できます。関数は `PairLensNodeInfo` を受け取り、文字列または文字列とハイライトグループのペアの配列を返します：
+You can also specify a function for the format field. The function receives `PairLensNodeInfo` and returns either a string or an array of string and highlight group pairs:
 
 ```lua
 require("pair-lens").setup({
   style = {
-    -- 複数のハイライトグループを使用した高度なフォーマット
+    -- Advanced formatting with multiple highlight groups
     format = function(info)
       local line_info = string.format("(%d:%d-%d) ", info.line_count, info.start_line, info.end_line)
       local start_text = info.start_text
@@ -105,20 +107,20 @@ require("pair-lens").setup({
 })
 ```
 
-この例では、アイコン、行数情報、開始位置のテキストをそれぞれ異なるハイライトグループで表示できます。
+This example allows you to display icons, line count information, and start position text with different highlight groups.
 
-## コマンド
+## Commands
 
-| コマンド           | 説明                            |
-| ------------------ | ------------------------------- |
-| `:PairLensEnable`  | プラグインを有効化              |
-| `:PairLensDisable` | プラグインを無効化              |
-| `:PairLensToggle`  | プラグインの有効/無効を切り替え |
+| Command            | Description                    |
+| ------------------ | ------------------------------ |
+| `:PairLensEnable`  | Enable the plugin             |
+| `:PairLensDisable` | Disable the plugin            |
+| `:PairLensToggle`  | Toggle plugin enable/disable  |
 
-## ライセンス
+## License
 
 MIT
 
-## クレジット
+## Credits
 
-このプラグインは [bracket-lens](https://github.com/wraith13/bracket-lens-vscode) から着想を得ています。
+This plugin is inspired by [bracket-lens](https://github.com/wraith13/bracket-lens-vscode).
