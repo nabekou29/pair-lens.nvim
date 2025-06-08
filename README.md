@@ -59,10 +59,11 @@ require("pair-lens").setup({
   enabled = true,
   style = {
     -- 表示フォーマット
-    -- {sl}: 開始位置の行番号
-    -- {el}: 終了位置の行番号
-    -- {st}: 開始位置の文字列
-    -- {et}: 終了位置の文字列
+    -- {sl} / {start_line}: 開始位置の行番号
+    -- {el} / {end_line}: 終了位置の行番号
+    -- {st} / {start_text}: 開始位置の文字列
+    -- {et} / {end_text}: 終了位置の文字列
+    -- {lc} / {line_count}: ブロックの行数
     format = "end: {sl}",
     -- ハイライトグループ
     hl = "Comment",

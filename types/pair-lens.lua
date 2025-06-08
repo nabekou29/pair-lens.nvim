@@ -14,7 +14,7 @@
 ---@field end_line number End line number (1-indexed)
 ---@field start_text string Text of the start line
 ---@field end_text string Text of the end line
----@field total_lines number Total number of lines in the node
+---@field line_count number Number of lines in the node
 ---@field node_text string Text content of the node
 ---@field bufnr number Buffer number
 ---@field node_type string Type of the treesitter node
@@ -26,4 +26,3 @@
 ---@field autocmd_group number|nil Autocmd group ID
 
 return {}
-

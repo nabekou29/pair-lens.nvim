@@ -44,7 +44,7 @@ function M.extract_node_info(node, bufnr)
     end_line = end_row + 1,
     start_text = start_text,
     end_text = end_text,
-    total_lines = end_row - start_row + 1,
+    line_count = end_row - start_row + 1,
     node_text = node_text,
     bufnr = bufnr,
     node_type = node:type(),
@@ -90,7 +90,7 @@ function M.should_show_lens(node_info, config)
     return false
   end
 
-  if node_info.total_lines < config.min_lines then
+  if node_info.line_count < config.min_lines then
     return false
   end
 
