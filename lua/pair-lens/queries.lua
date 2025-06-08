@@ -1,5 +1,41 @@
 local M = {}
 
+local javascript = [[
+  (function_declaration) @function
+  (class_declaration) @class
+  (method_definition) @method
+  (if_statement) @if
+  (for_statement) @for
+  (while_statement) @while
+  (try_statement) @try
+  (arrow_function) @arrow
+  (object) @object
+]]
+
+local typescript = javascript .. [[
+  (interface_declaration) @interface
+  (object_type) @object
+]]
+
+local jsx = javascript
+  .. [[
+  (jsx_element) @jsx_element
+  (jsx_opening_element) @jsx_opening_element
+]]
+
+local tsx = typescript
+  .. [[
+  (jsx_element) @jsx_element
+  (jsx_opening_element) @jsx_opening_element
+]]
+
+local json = [[
+  (object) @object
+  (array) @array
+]]
+
+local jsonc = json
+
 M.default_queries = {
   lua = [[
     (function_definition) @function
@@ -10,30 +46,12 @@ M.default_queries = {
     (do_statement) @do
   ]],
 
-  javascript = [[
-    (function_declaration) @function
-    (class_declaration) @class
-    (method_definition) @method
-    (if_statement) @if
-    (for_statement) @for
-    (while_statement) @while
-    (try_statement) @try
-    (arrow_function) @arrow
-    (object) @object
-  ]],
-
-  typescript = [[
-    (function_declaration) @function
-    (class_declaration) @class
-    (method_definition) @method
-    (if_statement) @if
-    (for_statement) @for
-    (while_statement) @while
-    (try_statement) @try
-    (arrow_function) @arrow
-    (object_type) @object
-    (interface_declaration) @interface
-  ]],
+  javascript = javascript,
+  typescript = typescript,
+  jsx = jsx,
+  tsx = tsx,
+  json = json,
+  jsonc = jsonc,
 
   python = [[
     (function_definition) @function
