@@ -28,7 +28,7 @@ end
 function M.clean_plugin()
   -- プラグインの状態をリセット
   loader.reload("pair-lens.nvim", { msg = false })
-  
+
   -- 設定をデフォルトに戻す
   local config = require("pair-lens.config")
   config.setup({})
@@ -113,4 +113,3 @@ end]]
 end
 
 return M
-

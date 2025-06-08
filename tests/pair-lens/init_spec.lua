@@ -31,8 +31,11 @@ describe("init", function()
 
       -- TreeSitterを待機
       helper.wait_for_treesitter()
-      
-      client:update_buffer(buf)
+
+      local ok, parser = pcall(vim.treesitter.get_parser, buf)
+      if ok and parser then
+        client:update_virtual_text_for_buffer(buf, parser)
+      end
       helper.wait_for_debounce()
 
       -- endの行（0から始まるので6）
@@ -46,7 +49,10 @@ describe("init", function()
       local buf = helper.create_lua_function_buffer()
       local client = pair_lens.get_client()
 
-      client:update_buffer(buf)
+      local ok, parser = pcall(vim.treesitter.get_parser, buf)
+      if ok and parser then
+        client:update_virtual_text_for_buffer(buf, parser)
+      end
       client:clear_buffer(buf)
 
       local virtual_text = helper.get_virtual_text(buf, 7)
@@ -80,4 +86,3 @@ describe("init", function()
     end)
   end)
 end)
-
