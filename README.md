@@ -66,7 +66,7 @@ require("pair-lens").setup({
     -- {lc} / {line_count}: ブロックの行数
     format = "󰶢 (:{start_line}-{end_line}) {start_text}",
     -- ハイライトグループ
-    hl = "Comment",
+    hl = "PairLensVirtualText",
   },
   -- 無効にするファイルタイプ
   disable_filetypes = {},
@@ -83,6 +83,29 @@ require("pair-lens").setup({
   min_lines = 6,
 })
 ```
+
+### 高度なカスタマイズ
+
+format フィールドには関数も指定できます。関数は `PairLensNodeInfo` を受け取り、文字列または文字列とハイライトグループのペアの配列を返します：
+
+```lua
+require("pair-lens").setup({
+  style = {
+    -- 複数のハイライトグループを使用した高度なフォーマット
+    format = function(info)
+      local line_info = string.format("(%d:%d-%d) ", info.line_count, info.start_line, info.end_line)
+      local start_text = info.start_text
+      return {
+        { "󰶢 ", "PairLensVirtualText" },
+        { line_info, "PairLensVirtualTextNum" },
+        { start_text, "PairLensVirtualTextCode" },
+      }
+    end,
+  },
+})
+```
+
+この例では、アイコン、行数情報、開始位置のテキストをそれぞれ異なるハイライトグループで表示できます。
 
 ## コマンド
 
