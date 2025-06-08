@@ -1,5 +1,8 @@
 local M = {}
 
+---@param bufnr number
+---@param line_nr number
+---@return string|nil
 function M.get_line_text(bufnr, line_nr)
   if not vim.api.nvim_buf_is_valid(bufnr) then
     return nil
@@ -14,6 +17,9 @@ function M.get_line_text(bufnr, line_nr)
   return lines[1] or ""
 end
 
+---@param node any
+---@param bufnr number
+---@return PairLensNodeInfo|nil
 function M.extract_node_info(node, bufnr)
   if not node then
     return nil
@@ -52,6 +58,9 @@ function M.log_debug(...)
   end
 end
 
+---@param fn function
+---@param delay number
+---@return function
 function M.debounce(fn, delay)
   local timer = nil
   return function(...)
@@ -65,10 +74,17 @@ function M.debounce(fn, delay)
   end
 end
 
+---@param cursor_line number
+---@param start_line number
+---@param end_line number
+---@return boolean
 function M.is_cursor_in_range(cursor_line, start_line, end_line)
   return cursor_line >= start_line and cursor_line <= end_line
 end
 
+---@param node_info PairLensNodeInfo|nil
+---@param config PairLensConfig
+---@return boolean
 function M.should_show_lens(node_info, config)
   if not node_info then
     return false

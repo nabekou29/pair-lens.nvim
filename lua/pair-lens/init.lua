@@ -5,6 +5,7 @@ local M = {}
 
 M.client = nil
 
+---@param opts? PairLensConfig
 function M.setup(opts)
   config.setup(opts)
 
@@ -20,4 +21,3 @@ function M.get_client()
 end
 
 return M
-

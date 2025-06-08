@@ -5,6 +5,7 @@ local utils = require("pair-lens.utils")
 local Client = {}
 Client.__index = Client
 
+---@return PairLensClient
 function Client.new()
   local self = setmetatable({}, Client)
   self.namespace = vim.api.nvim_create_namespace("pair-lens")
@@ -93,11 +94,13 @@ function Client:toggle()
   end
 end
 
+---@param bufnr number
 function Client:clear_buffer(bufnr)
   self.buffers[bufnr] = nil
   self:clear_virtual_text(bufnr)
 end
 
+---@param bufnr number
 function Client:clear_virtual_text(bufnr)
   if vim.api.nvim_buf_is_valid(bufnr) then
     vim.api.nvim_buf_clear_namespace(bufnr, self.namespace, 0, -1)
@@ -118,6 +121,9 @@ function Client:update_all_buffers()
   end
 end
 
+---@param node_info PairLensNodeInfo
+---@param format_config PairLensStyleConfig
+---@return string
 function Client:format_virtual_text(node_info, format_config)
   local format = format_config.format
 
@@ -134,6 +140,7 @@ function Client:format_virtual_text(node_info, format_config)
   return text
 end
 
+---@param bufnr number
 function Client:update_buffer(bufnr)
   if not vim.api.nvim_buf_is_valid(bufnr) then
     return
@@ -183,4 +190,3 @@ function Client:update_buffer(bufnr)
 end
 
 return Client
-
