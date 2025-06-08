@@ -111,4 +111,3 @@ function M.clear_virtual_text(bufnr, namespace)
 end
 
 return M
-

@@ -78,8 +78,10 @@ describe("utils", function()
     end)
 
     it("should return true for large blocks", function()
-      local buf = helper.create_test_buffer("line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10\nline11\nline12\nline13\nline14\nline15\nline16\nline17\nline18\nline19\nline20")
-      
+      local buf = helper.create_test_buffer(
+        "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10\nline11\nline12\nline13\nline14\nline15\nline16\nline17\nline18\nline19\nline20"
+      )
+
       local node_info = {
         line_count = 10,
         start_line = 1,
@@ -90,9 +92,8 @@ describe("utils", function()
       vim.api.nvim_win_set_cursor(0, { 20, 0 })
 
       assert.is_true(utils.should_show_lens(node_info, config))
-      
+
       helper.cleanup_buffer(buf)
     end)
   end)
 end)
-
