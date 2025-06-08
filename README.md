@@ -30,6 +30,7 @@
   dependencies = {
     "nvim-treesitter/nvim-treesitter",
   },
+  event = { "BufReadPre", "BufNewFile" },
   config = function()
     require("pair-lens").setup()
   end,
@@ -61,32 +62,34 @@ require("pair-lens").setup({
     -- {sl}: 開始位置の行番号
     -- {el}: 終了位置の行番号
     -- {st}: 開始位置の文字列
-    format = "⟸ (:{sl}-{el}) {st}",
+    -- {et}: 終了位置の文字列
+    format = "end: {sl}",
     -- ハイライトグループ
     hl = "Comment",
   },
   -- 無効にするファイルタイプ
-  disable_filetypes = {},
-  -- 追加のキーワードペア
-  pairs = {
-    -- 例: Rust の match 式
-    -- rust = {
-    --   match_arm = { start = "match", mid = "=>", last = "," },
-    -- },
+  disable_filetypes = { "help", "terminal", "dashboard" },
+  -- カスタムクエリ（Tree-sitterクエリをオーバーライド）
+  custom_queries = {
+    -- 例: Luaのカスタムクエリ
+    -- lua = [[
+    --   (function_definition) @function
+    --   (if_statement) @if
+    -- ]],
   },
   -- 表示する最小行数（デフォルト: 5）
   -- 開始位置から終了位置までの行数がこの値未満の場合は表示しません
-  min_lines = 5,
+  min_lines = 6,
 })
 ```
 
 ## コマンド
 
-| コマンド | 説明 |
-|----------|------|
-| `:PairLensEnable` | プラグインを有効化 |
-| `:PairLensDisable` | プラグインを無効化 |
-| `:PairLensToggle` | プラグインの有効/無効を切り替え |
+| コマンド           | 説明                            |
+| ------------------ | ------------------------------- |
+| `:PairLensEnable`  | プラグインを有効化              |
+| `:PairLensDisable` | プラグインを無効化              |
+| `:PairLensToggle`  | プラグインの有効/無効を切り替え |
 
 ## ライセンス
 
