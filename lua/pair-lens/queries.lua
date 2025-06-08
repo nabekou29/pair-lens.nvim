@@ -9,7 +9,7 @@ local javascript = [[
   (while_statement) @while
   (try_statement) @try
   (arrow_function) @arrow
-  (object) @object
+  (lexical_declaration) @declaration
 ]]
 
 local typescript = javascript .. [[
@@ -99,7 +99,6 @@ M.default_queries = {
     (type_declaration) @type
     (if_statement) @if
     (for_statement) @for
-    (switch_statement) @switch
     (select_statement) @select
   ]],
 }
