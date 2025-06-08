@@ -97,9 +97,21 @@ M.default_queries = {
     (function_declaration) @function
     (method_declaration) @method
     (type_declaration) @type
+    (var_declaration) @declaration
     (if_statement) @if
     (for_statement) @for
     (select_statement) @select
+  ]],
+
+  elm = [[
+    (function_declaration_left) @function
+    (type_declaration) @type
+    (type_alias_declaration) @type_alias
+    (case_of_expr) @case
+    (if_else_expr) @if
+    (let_in_expr) @let
+    (function_call_expr) @function_call
+    (value_declaration) @declaration
   ]],
 }
 
