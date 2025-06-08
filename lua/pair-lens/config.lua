@@ -4,7 +4,7 @@ M.defaults = {
   enabled = true,
   style = {
     format = "󰶢 (:{start_line}-{end_line}) {start_text}",
-    hl = "Comment",
+    hl = "PairLensVirtualText",
   },
   disable_filetypes = {},
   min_lines = 6,

@@ -6,7 +6,7 @@
 ---@field custom_queries table<string, string> Custom queries for specific filetypes
 
 ---@class PairLensStyleConfig
----@field format string|function Format string or function for virtual text
+---@field format string|fun(info: PairLensNodeInfo):string|string[][] Format string or function for virtual text (function should return string|string[][])
 ---@field hl string Highlight group for virtual text
 
 ---@class PairLensNodeInfo
