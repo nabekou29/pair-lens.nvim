@@ -123,7 +123,7 @@ end
 
 ---@param node_info PairLensNodeInfo
 ---@param format_config PairLensStyleConfig
----@return string
+---@return string|string[][]
 function Client:format_virtual_text(node_info, format_config)
   local format = format_config.format
 
@@ -183,9 +183,16 @@ function Client:update_buffer(bufnr)
 
     if node_info and utils.should_show_lens(node_info, conf) then
       local virtual_text = self:format_virtual_text(node_info, conf.style)
+      local virt_text_table
+
+      if type(virtual_text) == "table" then
+        virt_text_table = virtual_text
+      else
+        virt_text_table = { { virtual_text, conf.style.hl } }
+      end
 
       vim.api.nvim_buf_set_extmark(bufnr, self.namespace, node_info.end_line - 1, -1, {
-        virt_text = { { virtual_text, conf.style.hl } },
+        virt_text = virt_text_table,
         virt_text_pos = "eol",
       })
     end

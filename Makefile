@@ -2,7 +2,7 @@
 
 test:
 	@echo "Running tests..."
-	nvim --clean -l tests/busted.lua tests
+	NVIM_LISTEN_ADDRESS="" nvim -l tests/busted.lua tests
 
 clean-test:
 	@echo "Cleaning up test files..."
