@@ -133,9 +133,15 @@ function Client:format_virtual_text(node_info, format_config)
 
   local text = format
   text = text:gsub("{sl}", tostring(node_info.start_line))
+  text = text:gsub("{start_line}", tostring(node_info.start_line))
   text = text:gsub("{el}", tostring(node_info.end_line))
+  text = text:gsub("{end_line}", tostring(node_info.end_line))
   text = text:gsub("{st}", node_info.start_text)
+  text = text:gsub("{start_text}", node_info.start_text)
   text = text:gsub("{et}", node_info.end_text)
+  text = text:gsub("{end_text}", node_info.end_text)
+  text = text:gsub("{lc}", tostring(node_info.line_count))
+  text = text:gsub("{line_count}", tostring(node_info.line_count))
 
   return text
 end
