@@ -50,6 +50,8 @@ function Client:update_virtual_text_for_buffer(bufnr, parser)
     return
   end
 
+  local virtual_texts_by_line = {}
+
   for id, node in query:iter_captures(root, bufnr, 0, -1) do
     local start_row, _, end_row, _ = node:range()
     local lines_between = end_row - start_row + 1
@@ -73,11 +75,20 @@ function Client:update_virtual_text_for_buffer(bufnr, parser)
         virt_text_table = { { virtual_text, conf.style.hl } }
       end
 
-      vim.api.nvim_buf_set_extmark(bufnr, self.namespace, end_row, -1, {
-        virt_text = virt_text_table,
-        virt_text_pos = "eol",
-      })
+      if not virtual_texts_by_line[end_row] or virtual_texts_by_line[end_row].line_count < lines_between then
+        virtual_texts_by_line[end_row] = {
+          virt_text = virt_text_table,
+          line_count = lines_between,
+        }
+      end
     end
+  end
+
+  for row, vtext_info in pairs(virtual_texts_by_line) do
+    vim.api.nvim_buf_set_extmark(bufnr, self.namespace, row, -1, {
+      virt_text = vtext_info.virt_text,
+      virt_text_pos = "eol",
+    })
   end
 end
 
