@@ -102,5 +102,13 @@ function M.should_show_lens(node_info, config)
   return true
 end
 
+---@param bufnr number
+---@param namespace number
+function M.clear_virtual_text(bufnr, namespace)
+  if vim.api.nvim_buf_is_valid(bufnr) then
+    vim.api.nvim_buf_clear_namespace(bufnr, namespace, 0, -1)
+  end
+end
+
 return M
 

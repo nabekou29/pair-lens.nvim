@@ -19,6 +19,95 @@ function Client:setup()
   self:create_commands()
 end
 
+---@param node TSNode
+---@param bufnr number
+---@return string
+local function get_line_text(node, bufnr)
+  local start_row = node:start()
+  local line = vim.api.nvim_buf_get_lines(bufnr, start_row, start_row + 1, false)[1]
+  return line or ""
+end
+
+---@param bufnr number
+function Client:attach_to_buffer(bufnr)
+  if self.buffers[bufnr] then
+    return
+  end
+
+  local filetype = vim.bo[bufnr].filetype
+  if config.is_filetype_disabled(filetype) then
+    return
+  end
+
+  local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
+  if not ok or not parser then
+    return
+  end
+
+  local function update_virtual_text()
+    if not config.is_enabled() then
+      utils.clear_virtual_text(bufnr, self.namespace)
+      return
+    end
+
+    utils.clear_virtual_text(bufnr, self.namespace)
+
+    local tree = parser:parse()[1]
+    if not tree then
+      return
+    end
+
+    local root = tree:root()
+    local lang = parser:lang()
+    local query = queries.get_parsed_query(lang, config.get().custom_queries)
+    if not query then
+      return
+    end
+
+    for id, node in query:iter_captures(root, bufnr, 0, -1) do
+      local start_row, _, end_row, _ = node:range()
+      local lines_between = end_row - start_row + 1
+      local conf = config.get()
+
+      if lines_between >= conf.min_lines then
+        local node_info = {
+          start_line = start_row + 1,
+          end_line = end_row + 1,
+          start_text = get_line_text(node, bufnr),
+          end_text = get_line_text(node, bufnr),
+          line_count = lines_between,
+        }
+
+        local virtual_text = self:format_virtual_text(node_info, conf.style)
+        local virt_text_table
+
+        if type(virtual_text) == "table" then
+          virt_text_table = virtual_text
+        else
+          virt_text_table = { { virtual_text, conf.style.hl } }
+        end
+
+        vim.api.nvim_buf_set_extmark(bufnr, self.namespace, end_row, -1, {
+          virt_text = virt_text_table,
+          virt_text_pos = "eol",
+        })
+      end
+    end
+  end
+
+  vim.api.nvim_buf_attach(bufnr, false, {
+    on_lines = function()
+      vim.defer_fn(update_virtual_text, 100)
+    end,
+    on_detach = function()
+      self:clear_buffer(bufnr)
+    end,
+  })
+
+  self.buffers[bufnr] = true
+  update_virtual_text()
+end
+
 function Client:create_autocmds()
   if self.autocmd_group then
     vim.api.nvim_del_augroup_by_id(self.autocmd_group)
@@ -26,29 +115,10 @@ function Client:create_autocmds()
 
   self.autocmd_group = vim.api.nvim_create_augroup("PairLens", { clear = true })
 
-  local update_debounced = utils.debounce(function(bufnr)
-    self:update_buffer(bufnr)
-  end, 100)
-
-  vim.api.nvim_create_autocmd({ "BufEnter", "TextChanged", "InsertLeave" }, {
+  vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
     group = self.autocmd_group,
     callback = function(args)
-      local bufnr = args.buf
-
-      if not config.is_enabled() then
-        return
-      end
-
-      local filetype = vim.bo[bufnr].filetype
-      if config.is_filetype_disabled(filetype) then
-        return
-      end
-
-      if not vim.treesitter.highlighter.active[bufnr] then
-        return
-      end
-
-      update_debounced(bufnr)
+      self:attach_to_buffer(args.buf)
     end,
   })
 
@@ -76,13 +146,21 @@ end
 
 function Client:enable()
   config.options.enabled = true
-  self:update_all_buffers()
+  for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_loaded(bufnr) then
+      self:attach_to_buffer(bufnr)
+    end
+  end
   vim.notify("pair-lens: Enabled")
 end
 
 function Client:disable()
   config.options.enabled = false
-  self:clear_all_virtual_text()
+  for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_loaded(bufnr) then
+      utils.clear_virtual_text(bufnr, self.namespace)
+    end
+  end
   vim.notify("pair-lens: Disabled")
 end
 
@@ -97,31 +175,10 @@ end
 ---@param bufnr number
 function Client:clear_buffer(bufnr)
   self.buffers[bufnr] = nil
-  self:clear_virtual_text(bufnr)
+  utils.clear_virtual_text(bufnr, self.namespace)
 end
 
----@param bufnr number
-function Client:clear_virtual_text(bufnr)
-  if vim.api.nvim_buf_is_valid(bufnr) then
-    vim.api.nvim_buf_clear_namespace(bufnr, self.namespace, 0, -1)
-  end
-end
-
-function Client:clear_all_virtual_text()
-  for bufnr, _ in pairs(self.buffers) do
-    self:clear_virtual_text(bufnr)
-  end
-end
-
-function Client:update_all_buffers()
-  for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.api.nvim_buf_is_loaded(bufnr) then
-      self:update_buffer(bufnr)
-    end
-  end
-end
-
----@param node_info PairLensNodeInfo
+---@param node_info table
 ---@param format_config PairLensStyleConfig
 ---@return string|string[][]
 function Client:format_virtual_text(node_info, format_config)
@@ -146,60 +203,5 @@ function Client:format_virtual_text(node_info, format_config)
   return text
 end
 
----@param bufnr number
-function Client:update_buffer(bufnr)
-  if not vim.api.nvim_buf_is_valid(bufnr) then
-    return
-  end
-
-  local filetype = vim.bo[bufnr].filetype
-  local conf = config.get()
-
-  self:clear_virtual_text(bufnr)
-
-  if not config.is_enabled() or config.is_filetype_disabled(filetype) then
-    return
-  end
-
-  local query = queries.get_parsed_query(filetype, conf.custom_queries)
-  if not query then
-    return
-  end
-
-  local parser = vim.treesitter.get_parser(bufnr, filetype)
-  if not parser then
-    return
-  end
-
-  local tree = parser:parse()[1]
-  if not tree then
-    return
-  end
-
-  local root = tree:root()
-
-  for id, node in query:iter_captures(root, bufnr, 0, -1) do
-    local node_info = utils.extract_node_info(node, bufnr)
-
-    if node_info and utils.should_show_lens(node_info, conf) then
-      local virtual_text = self:format_virtual_text(node_info, conf.style)
-      local virt_text_table
-
-      if type(virtual_text) == "table" then
-        virt_text_table = virtual_text
-      else
-        virt_text_table = { { virtual_text, conf.style.hl } }
-      end
-
-      vim.api.nvim_buf_set_extmark(bufnr, self.namespace, node_info.end_line - 1, -1, {
-        virt_text = virt_text_table,
-        virt_text_pos = "eol",
-      })
-    end
-  end
-
-  self.buffers[bufnr] = true
-  utils.log_debug("Updated virtual text for buffer", bufnr)
-end
-
 return Client
+
