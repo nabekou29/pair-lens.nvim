@@ -75,7 +75,10 @@ function Client:update_virtual_text_for_buffer(bufnr, parser)
         virt_text_table = { { virtual_text, conf.style.hl } }
       end
 
-      if not virtual_texts_by_line[end_row] or virtual_texts_by_line[end_row].line_count < lines_between then
+      if
+        not virtual_texts_by_line[end_row]
+        or virtual_texts_by_line[end_row].line_count < lines_between
+      then
         virtual_texts_by_line[end_row] = {
           virt_text = virt_text_table,
           line_count = lines_between,
