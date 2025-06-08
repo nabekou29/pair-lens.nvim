@@ -7,7 +7,18 @@
 
 ブロック構造の終端（`end` など）に、対応する開始位置の情報を表示する Neovim プラグインです。
 
-![Demo](./demo.gif)
+## Screenshots
+
+<table>
+<tr>
+<td align="center"><strong>Go</strong></td>
+<td align="center"><strong>React/TypeScript</strong></td>
+</tr>
+<tr>
+<td><img src="./screenshots/go-example.png" alt="Go Example" width="300"/></td>
+<td><img src="./screenshots/react-example.png" alt="React Example" width="300"/></td>
+</tr>
+</table>
 
 ## 特徴
 

@@ -7,7 +7,18 @@
 
 A Neovim plugin that displays information about the corresponding start position at the end of block structures (such as `end`).
 
-![Demo](./demo.gif)
+## Screenshots
+
+<table>
+<tr>
+<td align="center"><strong>Go</strong></td>
+<td align="center"><strong>React/TypeScript</strong></td>
+</tr>
+<tr>
+<td><img src="./screenshots/go-example.png" alt="Go Example" width="300"/></td>
+<td><img src="./screenshots/react-example.png" alt="React Example" width="300"/></td>
+</tr>
+</table>
 
 ## Features
 
@@ -111,11 +122,11 @@ This example allows you to display icons, line count information, and start posi
 
 ## Commands
 
-| Command            | Description                    |
-| ------------------ | ------------------------------ |
-| `:PairLensEnable`  | Enable the plugin             |
-| `:PairLensDisable` | Disable the plugin            |
-| `:PairLensToggle`  | Toggle plugin enable/disable  |
+| Command            | Description                  |
+| ------------------ | ---------------------------- |
+| `:PairLensEnable`  | Enable the plugin            |
+| `:PairLensDisable` | Disable the plugin           |
+| `:PairLensToggle`  | Toggle plugin enable/disable |
 
 ## License
 
