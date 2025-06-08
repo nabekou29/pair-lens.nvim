@@ -3,10 +3,10 @@ local M = {}
 M.defaults = {
   enabled = true,
   style = {
-    format = "⟸ (:{sl}-{el}) {st}",
+    format = "󰶢 (:{start_line}-{end_line}) {start_text}",
     hl = "Comment",
   },
-  disable_filetypes = { "help", "terminal", "dashboard" },
+  disable_filetypes = {},
   min_lines = 6,
   custom_queries = {},
 }
@@ -79,4 +79,3 @@ function M.is_filetype_disabled(filetype)
 end
 
 return M
-
