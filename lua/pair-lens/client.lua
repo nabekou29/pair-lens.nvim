@@ -25,7 +25,7 @@ end
 local function get_line_text(node, bufnr)
   local start_row = node:start()
   local line = vim.api.nvim_buf_get_lines(bufnr, start_row, start_row + 1, false)[1]
-  return line or ""
+  return vim.trim(line or "")
 end
 
 ---@param bufnr number
