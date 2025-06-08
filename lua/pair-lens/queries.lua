@@ -30,8 +30,7 @@ local tsx = typescript
 ]]
 
 local json = [[
-  (object) @object
-  (array) @array
+  (pair) @pair
 ]]
 
 local jsonc = json
@@ -52,6 +51,10 @@ M.default_queries = {
   tsx = tsx,
   json = json,
   jsonc = jsonc,
+
+  yaml = [[
+    (block_mapping_pair) @pair
+  ]],
 
   python = [[
     (function_definition) @function
