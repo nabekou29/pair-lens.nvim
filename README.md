@@ -64,12 +64,12 @@ require("pair-lens").setup({
     -- {st} / {start_text}: 開始位置の文字列
     -- {et} / {end_text}: 終了位置の文字列
     -- {lc} / {line_count}: ブロックの行数
-    format = "end: {sl}",
+    format = "󰶢 (:{start_line}-{end_line}) {start_text}",
     -- ハイライトグループ
     hl = "Comment",
   },
   -- 無効にするファイルタイプ
-  disable_filetypes = { "help", "terminal", "dashboard" },
+  disable_filetypes = {},
   -- カスタムクエリ（Tree-sitterクエリをオーバーライド）
   custom_queries = {
     -- 例: Luaのカスタムクエリ
