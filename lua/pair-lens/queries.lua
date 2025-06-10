@@ -101,6 +101,8 @@ M.default_queries = {
     (if_statement) @if
     (for_statement) @for
     (select_statement) @select
+    (expression_switch_statement) @switch
+    (type_switch_statement) @switch
   ]],
 
   elm = [[
