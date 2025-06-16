@@ -88,10 +88,14 @@ function Client:update_virtual_text_for_buffer(bufnr, parser)
   end
 
   for row, vtext_info in pairs(virtual_texts_by_line) do
-    vim.api.nvim_buf_set_extmark(bufnr, self.namespace, row, -1, {
-      virt_text = vtext_info.virt_text,
-      virt_text_pos = "eol",
-    })
+    -- Check if row is within buffer bounds
+    local line_count = vim.api.nvim_buf_line_count(bufnr)
+    if row >= 0 and row < line_count then
+      vim.api.nvim_buf_set_extmark(bufnr, self.namespace, row, -1, {
+        virt_text = vtext_info.virt_text,
+        virt_text_pos = "eol",
+      })
+    end
   end
 end
 
