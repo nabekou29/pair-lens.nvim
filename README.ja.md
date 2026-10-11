@@ -29,6 +29,7 @@
   - JavaScript/TypeScript: 関数、クラス、メソッド、制御構文
   - Rust: 関数、impl、構造体、enum、trait、制御構文
   - Go: 関数、メソッド、型定義、制御構文
+  - Protocol Buffers: message、enum、service、oneof、rpc、extend
 - Tree-sitter を使用した正確な構文解析
 - 軽量で高速な動作
 - カスタマイズ可能な表示スタイル
