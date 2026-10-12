@@ -135,6 +135,10 @@ function Client:attach_to_buffer(bufnr)
     on_lines = function()
       schedule_update()
     end,
+    -- Without on_reload, reloading the file from disk detaches this callback.
+    on_reload = function()
+      schedule_update()
+    end,
     on_detach = function()
       cancel_updates()
       self:clear_buffer(bufnr)

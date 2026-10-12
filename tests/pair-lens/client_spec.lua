@@ -68,4 +68,34 @@ describe("client", function()
       assert.equal("", vim.v.errmsg)
     end)
   end)
+
+  describe("on reload", function()
+    it("should keep the lenses after the file is reloaded from disk", function()
+      local path = vim.fn.tempname() .. ".lua"
+      local scratch = helper.create_lua_function_buffer()
+      local lines = vim.api.nvim_buf_get_lines(scratch, 0, -1, false)
+      helper.cleanup_buffer(scratch)
+      vim.fn.writefile(lines, path)
+      vim.cmd.edit(path)
+      local buf = vim.api.nvim_get_current_buf()
+      helper.wait_for_treesitter()
+
+      vim.fn.writefile(vim.list_extend({ "-- changed" }, lines), path)
+      local future = os.time() + 10
+      vim.uv.fs_utime(path, future, future)
+      vim.bo[buf].autoread = true
+      vim.cmd.checktime(buf)
+      helper.wait_for_debounce()
+
+      assert.equal("-- changed", vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1])
+      assert.is_not_nil(helper.get_virtual_text(buf, 7))
+
+      vim.api.nvim_buf_set_lines(buf, 0, 0, false, { "-- edit" })
+      helper.wait_for_debounce()
+      assert.is_not_nil(helper.get_virtual_text(buf, 8))
+
+      helper.cleanup_buffer(buf)
+      vim.fn.delete(path)
+    end)
+  end)
 end)
