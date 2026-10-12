@@ -119,11 +119,23 @@ function Client:attach_to_buffer(bufnr)
     self:update_virtual_text_for_buffer(bufnr, parser)
   end
 
+  -- A single timer per buffer coalesces a burst of edits into one update,
+  -- since each update re-renders the whole buffer.
+  local timer = assert(vim.uv.new_timer())
+  local deferred_update = vim.schedule_wrap(function()
+    if vim.api.nvim_buf_is_valid(bufnr) then
+      update_virtual_text()
+    end
+  end)
+
   vim.api.nvim_buf_attach(bufnr, false, {
     on_lines = function()
-      vim.defer_fn(update_virtual_text, 100)
+      timer:stop()
+      timer:start(100, 0, deferred_update)
     end,
     on_detach = function()
+      timer:stop()
+      timer:close()
       self:clear_buffer(bufnr)
     end,
   })
