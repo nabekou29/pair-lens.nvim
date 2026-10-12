@@ -20,6 +20,27 @@ describe("client", function()
     end
   end)
 
+  describe("format_virtual_text", function()
+    local function format(start_text)
+      return client:format_virtual_text({
+        start_line = 1,
+        end_line = 10,
+        start_text = start_text,
+        end_text = "}",
+        line_count = 10,
+      }, { format = "(:{sl}-{el}) {st}", hl = "Comment" })
+    end
+
+    it("should keep % in the source text as is", function()
+      assert.equal("(:1-10) if i%2 == 0 {", format("if i%2 == 0 {"))
+      assert.equal("(:1-10) // 0-100% complete", format("// 0-100% complete"))
+    end)
+
+    it("should not expand placeholders in the source text", function()
+      assert.equal('(:1-10) local s = "{lc}"', format('local s = "{lc}"'))
+    end)
+  end)
+
   describe("on edit", function()
     it("should update once for a burst of edits", function()
       local buf = helper.create_lua_function_buffer()
