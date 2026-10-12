@@ -108,18 +108,27 @@ function Client:attach_to_buffer(bufnr)
     return
   end
 
-  local filetype = vim.bo[bufnr].filetype
-  if config.is_filetype_disabled(filetype) then
+  local function get_parser()
+    if config.is_filetype_disabled(vim.bo[bufnr].filetype) then
+      return nil
+    end
+    local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
+    return ok and parser or nil
+  end
+
+  if not get_parser() then
     return
   end
 
-  local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
-  if not ok or not parser then
-    return
-  end
-
+  -- The parser is looked up on every update because the filetype, and with it
+  -- the language, can change after the buffer is attached.
   local function update_virtual_text()
-    self:update_virtual_text_for_buffer(bufnr, parser)
+    local parser = get_parser()
+    if parser then
+      self:update_virtual_text_for_buffer(bufnr, parser)
+    else
+      utils.clear_virtual_text(bufnr, self.namespace)
+    end
   end
 
   -- Each update re-renders the whole buffer, so a burst of edits is coalesced
@@ -145,7 +154,7 @@ function Client:attach_to_buffer(bufnr)
     end,
   })
 
-  self.buffers[bufnr] = true
+  self.buffers[bufnr] = { update = update_virtual_text }
   update_virtual_text()
 end
 
@@ -160,6 +169,20 @@ function Client:create_autocmds()
     group = self.autocmd_group,
     callback = function(args)
       self:attach_to_buffer(args.buf)
+    end,
+  })
+
+  -- A buffer may get its filetype only after it is shown (e.g. :setf in a new
+  -- buffer), or change it later.
+  vim.api.nvim_create_autocmd("FileType", {
+    group = self.autocmd_group,
+    callback = function(args)
+      local buffer = self.buffers[args.buf]
+      if buffer then
+        buffer.update()
+      else
+        self:attach_to_buffer(args.buf)
+      end
     end,
   })
 end
