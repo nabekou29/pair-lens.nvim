@@ -101,6 +101,37 @@ describe("client", function()
     end)
   end)
 
+  describe("on filetype change", function()
+    local function create_buffer(filetype)
+      local scratch = helper.create_lua_function_buffer()
+      local lines = vim.api.nvim_buf_get_lines(scratch, 0, -1, false)
+      helper.cleanup_buffer(scratch)
+      return helper.create_test_buffer(table.concat(lines, "\n"), filetype)
+    end
+
+    it("should show lenses once a filetype is set on a shown buffer", function()
+      local buf = create_buffer(nil)
+      assert.is_nil(helper.get_virtual_text(buf, 6))
+
+      vim.bo[buf].filetype = "lua"
+
+      assert.is_not_nil(helper.get_virtual_text(buf, 6))
+
+      helper.cleanup_buffer(buf)
+    end)
+
+    it("should use the parser for the new filetype", function()
+      local buf = create_buffer("json")
+      assert.is_nil(helper.get_virtual_text(buf, 6))
+
+      vim.bo[buf].filetype = "lua"
+
+      assert.is_not_nil(helper.get_virtual_text(buf, 6))
+
+      helper.cleanup_buffer(buf)
+    end)
+  end)
+
   describe("on reload", function()
     it("should keep the lenses after the file is reloaded from disk", function()
       local path = vim.fn.tempname() .. ".lua"

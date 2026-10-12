@@ -22,7 +22,7 @@
 
 ---@class PairLensClient
 ---@field namespace number Namespace for virtual text
----@field buffers table<number, boolean> Active buffers
+---@field buffers table<number, { update: fun() }> Attached buffers and their update function
 ---@field autocmd_group number|nil Autocmd group ID
 
 return {}
