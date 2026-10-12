@@ -128,11 +128,15 @@ function Client:attach_to_buffer(bufnr)
     end
   end)
 
+  local function schedule_update()
+    timer:stop()
+    timer:start(100, 0, deferred_update)
+  end
+
   vim.api.nvim_buf_attach(bufnr, false, {
-    on_lines = function()
-      timer:stop()
-      timer:start(100, 0, deferred_update)
-    end,
+    on_lines = schedule_update,
+    -- Without on_reload, reloading the file from disk detaches this callback.
+    on_reload = schedule_update,
     on_detach = function()
       timer:stop()
       timer:close()
