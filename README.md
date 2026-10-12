@@ -29,6 +29,7 @@ A Neovim plugin that displays information about the corresponding start position
   - JavaScript/TypeScript: functions, classes, methods, control structures
   - Rust: functions, impl, structs, enums, traits, control structures
   - Go: functions, methods, type definitions, control structures
+  - Protocol Buffers: message, enum, service, oneof, rpc, extend
 - Accurate syntax parsing using Tree-sitter
 - Lightweight and fast operation
 - Customizable display styles

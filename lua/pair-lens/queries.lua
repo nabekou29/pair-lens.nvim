@@ -115,6 +115,15 @@ M.default_queries = {
     (function_call_expr) @function_call
     (value_declaration) @declaration
   ]],
+
+  proto = [[
+    (message) @message
+    (enum) @enum
+    (service) @service
+    (oneof) @oneof
+    (rpc) @rpc
+    (extend) @extend
+  ]],
 }
 
 function M.get_query(lang, custom_queries)
