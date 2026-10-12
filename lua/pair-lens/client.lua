@@ -161,13 +161,6 @@ function Client:create_autocmds()
       self:attach_to_buffer(args.buf)
     end,
   })
-
-  vim.api.nvim_create_autocmd("BufDelete", {
-    group = self.autocmd_group,
-    callback = function(args)
-      self:clear_buffer(args.buf)
-    end,
-  })
 end
 
 function Client:create_commands()

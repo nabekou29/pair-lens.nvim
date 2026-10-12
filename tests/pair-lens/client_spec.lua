@@ -66,6 +66,39 @@ describe("client", function()
 
       assert.equal(0, update_count)
     end)
+
+    it("should not attach twice after the buffer is unlisted and listed again", function()
+      local buf = helper.create_lua_function_buffer()
+      local other = vim.api.nvim_create_buf(true, true)
+
+      for _ = 1, 3 do
+        vim.bo[buf].buflisted = false
+        vim.bo[buf].buflisted = true
+        vim.api.nvim_set_current_buf(other)
+        vim.api.nvim_set_current_buf(buf)
+      end
+      helper.wait_for_debounce()
+      update_count = 0
+
+      vim.api.nvim_buf_set_lines(buf, 0, 0, false, { "-- edit" })
+      helper.wait_for_debounce()
+
+      assert.equal(1, update_count)
+
+      helper.cleanup_buffer(other)
+      helper.cleanup_buffer(buf)
+    end)
+
+    it("should forget the buffer once it is unloaded by :bdelete", function()
+      local buf = helper.create_lua_function_buffer()
+      assert.is_not_nil(client.buffers[buf])
+
+      vim.cmd.bdelete({ args = { buf }, bang = true })
+
+      assert.is_nil(client.buffers[buf])
+
+      helper.cleanup_buffer(buf)
+    end)
   end)
 
   describe("on reload", function()
