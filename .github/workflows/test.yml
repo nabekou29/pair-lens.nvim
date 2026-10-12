@@ -9,7 +9,7 @@ on:
       - opened
       - synchronize
     paths:
-      - ".github/workflows/test.yaml"
+      - ".github/workflows/test.yml"
       - "Makefile"
       - "lua/**"
       - "tests/**"
@@ -40,6 +40,9 @@ jobs:
         with:
           neovim: true
           version: nightly
+
+      - name: setup tree-sitter cli
+        run: npm install -g tree-sitter-cli
 
       - name: run tests
         run: make test
