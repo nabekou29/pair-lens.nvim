@@ -68,6 +68,24 @@ describe("client", function()
 
       helper.cleanup_buffer(buf)
     end)
+
+    it("should show lenses for JSX elements in a javascriptreact buffer", function()
+      local buf = helper.create_test_buffer(
+        table.concat({
+          "const App = () => (",
+          "  <div>",
+          "    <span>a</span>",
+          "    <span>b</span>",
+          "  </div>",
+          ");",
+        }, "\n"),
+        "javascriptreact"
+      )
+
+      assert.is_not_nil(helper.get_virtual_text(buf, 4))
+
+      helper.cleanup_buffer(buf)
+    end)
   end)
 
   describe("on edit", function()

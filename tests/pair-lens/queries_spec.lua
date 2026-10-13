@@ -4,7 +4,6 @@ local queries = require("pair-lens.queries")
 -- queries cannot be checked here.
 local without_parser = {
   jsonc = true,
-  jsx = true,
 }
 
 describe("queries", function()
