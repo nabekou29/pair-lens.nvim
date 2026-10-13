@@ -20,6 +20,56 @@ describe("client", function()
     end
   end)
 
+  describe("format_virtual_text", function()
+    local function format(start_text)
+      return client:format_virtual_text({
+        start_line = 1,
+        end_line = 10,
+        start_text = start_text,
+        end_text = "}",
+        line_count = 10,
+      }, { format = "(:{sl}-{el}) {st}", hl = "Comment" })
+    end
+
+    it("should replace every placeholder and keep unknown ones", function()
+      local text = client:format_virtual_text({
+        start_line = 1,
+        end_line = 10,
+        start_text = "do",
+        end_text = "end",
+        line_count = 10,
+      }, {
+        format = "{sl}{start_line} {el}{end_line} {st}{start_text} {et}{end_text} {lc}{line_count} {x}",
+        hl = "Comment",
+      })
+
+      assert.equal("11 1010 dodo endend 1010 {x}", text)
+    end)
+
+    it("should keep % in the source text as is", function()
+      assert.equal("(:1-10) if i%2 == 0 {", format("if i%2 == 0 {"))
+      assert.equal("(:1-10) // 0-100% complete", format("// 0-100% complete"))
+    end)
+
+    it("should not expand placeholders in the source text", function()
+      assert.equal('(:1-10) local s = "{lc}"', format('local s = "{lc}"'))
+    end)
+  end)
+
+  describe("rendering", function()
+    it("should pass the opening and closing lines as start_text and end_text", function()
+      require("pair-lens.config").options.style.format = "[{st}] [{et}]"
+      local buf = helper.create_lua_function_buffer()
+
+      assert.same(
+        { { "[if true then] [end]", "Comment" } },
+        helper.get_virtual_text(buf, 6)
+      )
+
+      helper.cleanup_buffer(buf)
+    end)
+  end)
+
   describe("on edit", function()
     it("should update once for a burst of edits", function()
       local buf = helper.create_lua_function_buffer()
