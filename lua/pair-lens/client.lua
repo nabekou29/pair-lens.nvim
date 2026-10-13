@@ -22,12 +22,11 @@ function Client:setup()
   self:create_commands()
 end
 
----@param node TSNode
 ---@param bufnr number
+---@param row number
 ---@return string
-local function get_line_text(node, bufnr)
-  local start_row = node:start()
-  local line = vim.api.nvim_buf_get_lines(bufnr, start_row, start_row + 1, false)[1]
+local function get_line_text(bufnr, row)
+  local line = vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1]
   return vim.trim(line or "")
 end
 
@@ -64,8 +63,8 @@ function Client:update_virtual_text_for_buffer(bufnr, parser)
       local node_info = {
         start_line = start_row + 1,
         end_line = end_row + 1,
-        start_text = get_line_text(node, bufnr),
-        end_text = get_line_text(node, bufnr),
+        start_text = get_line_text(bufnr, start_row),
+        end_text = get_line_text(bufnr, end_row),
         line_count = lines_between,
       }
 
