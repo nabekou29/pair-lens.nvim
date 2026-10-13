@@ -108,18 +108,34 @@ function Client:attach_to_buffer(bufnr)
     return
   end
 
-  local filetype = vim.bo[bufnr].filetype
-  if config.is_filetype_disabled(filetype) then
+  local function get_parser()
+    local filetype = vim.bo[bufnr].filetype
+    if filetype == "" or config.is_filetype_disabled(filetype) then
+      return nil
+    end
+    local lang = vim.treesitter.language.get_lang(filetype)
+    if not lang or not queries.get_query(lang, config.get().custom_queries) then
+      return nil
+    end
+    -- Pass the language explicitly: without it, get_parser returns the parser
+    -- cached for the buffer even if it belongs to the previous filetype.
+    local ok, parser = pcall(vim.treesitter.get_parser, bufnr, lang)
+    return ok and parser or nil
+  end
+
+  if not get_parser() then
     return
   end
 
-  local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
-  if not ok or not parser then
-    return
-  end
-
+  -- The parser is looked up on every update because the filetype, and with it
+  -- the language, can change after the buffer is attached.
   local function update_virtual_text()
-    self:update_virtual_text_for_buffer(bufnr, parser)
+    local parser = get_parser()
+    if parser then
+      self:update_virtual_text_for_buffer(bufnr, parser)
+    else
+      utils.clear_virtual_text(bufnr, self.namespace)
+    end
   end
 
   -- Each update re-renders the whole buffer, so a burst of edits is coalesced
@@ -135,13 +151,17 @@ function Client:attach_to_buffer(bufnr)
     on_lines = function()
       schedule_update()
     end,
+    -- Without on_reload, reloading the file from disk detaches this callback.
+    on_reload = function()
+      schedule_update()
+    end,
     on_detach = function()
       cancel_updates()
       self:clear_buffer(bufnr)
     end,
   })
 
-  self.buffers[bufnr] = true
+  self.buffers[bufnr] = { update = update_virtual_text, schedule_update = schedule_update }
   update_virtual_text()
 end
 
@@ -159,10 +179,28 @@ function Client:create_autocmds()
     end,
   })
 
-  vim.api.nvim_create_autocmd("BufDelete", {
+  -- A buffer may get its filetype only after it is shown (e.g. :setf in a new
+  -- buffer), or change it later. Nothing is rendered inside the event itself:
+  -- FileType also fires while a file is being reloaded, before tree-sitter has
+  -- dropped the old tree, and an error here would abort the FileType handlers
+  -- of other plugins.
+  vim.api.nvim_create_autocmd("FileType", {
     group = self.autocmd_group,
     callback = function(args)
-      self:clear_buffer(args.buf)
+      local bufnr = args.buf
+      local buffer = self.buffers[bufnr]
+      if buffer then
+        buffer.schedule_update()
+        return
+      end
+
+      vim.schedule(function()
+        -- Hidden buffers (previews, LSP floats) are attached by BufWinEnter
+        -- once they are actually shown.
+        if vim.api.nvim_buf_is_valid(bufnr) and vim.fn.bufwinid(bufnr) ~= -1 then
+          self:attach_to_buffer(bufnr)
+        end
+      end)
     end,
   })
 end
@@ -186,14 +224,7 @@ function Client:enable()
   for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
     if vim.api.nvim_buf_is_loaded(bufnr) then
       if self.buffers[bufnr] then
-        -- Already attached, just update virtual text
-        local filetype = vim.bo[bufnr].filetype
-        if not config.is_filetype_disabled(filetype) then
-          local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
-          if ok and parser then
-            self:update_virtual_text_for_buffer(bufnr, parser)
-          end
-        end
+        self.buffers[bufnr].update()
       else
         self:attach_to_buffer(bufnr)
       end
