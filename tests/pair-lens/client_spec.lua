@@ -136,6 +136,7 @@ describe("client", function()
       assert.is_nil(helper.get_virtual_text(buf, 6))
 
       vim.bo[buf].filetype = "lua"
+      helper.wait_for_debounce()
 
       assert.is_not_nil(helper.get_virtual_text(buf, 6))
 
@@ -147,9 +148,60 @@ describe("client", function()
       assert.is_nil(helper.get_virtual_text(buf, 6))
 
       vim.bo[buf].filetype = "lua"
+      helper.wait_for_debounce()
 
       assert.is_not_nil(helper.get_virtual_text(buf, 6))
 
+      helper.cleanup_buffer(buf)
+    end)
+
+    it("should clear lenses when the filetype is cleared", function()
+      local buf = create_buffer("lua")
+      assert.is_not_nil(helper.get_virtual_text(buf, 6))
+
+      vim.bo[buf].filetype = ""
+      helper.wait_for_debounce()
+
+      assert.is_nil(helper.get_virtual_text(buf, 6))
+
+      helper.cleanup_buffer(buf)
+    end)
+
+    it("should not attach a buffer that is not shown in a window", function()
+      local buf = vim.api.nvim_create_buf(false, true)
+      vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "function f()", "end" })
+
+      vim.bo[buf].filetype = "lua"
+      helper.wait_for_debounce()
+
+      assert.is_nil(client.buffers[buf])
+
+      helper.cleanup_buffer(buf)
+    end)
+
+    it("should not abort other FileType handlers when rendering fails", function()
+      local buf = create_buffer(nil)
+      require("pair-lens.config").options.style.format = function()
+        error("broken format")
+      end
+      local other_handler_ran = false
+      local group = vim.api.nvim_create_augroup("PairLensSpecOther", { clear = true })
+      vim.api.nvim_create_autocmd("FileType", {
+        group = group,
+        callback = function()
+          other_handler_ran = true
+        end,
+      })
+
+      -- Filetype detection sets the filetype through vim.cmd, where an error
+      -- raised by a handler propagates and skips the remaining handlers.
+      pcall(vim.cmd.setfiletype, "lua")
+
+      assert.is_true(other_handler_ran)
+
+      vim.api.nvim_del_augroup_by_id(group)
+      -- The deferred render still fails; let it run before moving on.
+      pcall(vim.wait, 50)
       helper.cleanup_buffer(buf)
     end)
   end)
@@ -169,15 +221,18 @@ describe("client", function()
       local future = os.time() + 10
       vim.uv.fs_utime(path, future, future)
       vim.bo[buf].autoread = true
+      update_count = 0
       vim.cmd.checktime(buf)
       helper.wait_for_debounce()
 
       assert.equal("-- changed", vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1])
       assert.is_not_nil(helper.get_virtual_text(buf, 7))
+      assert.equal(1, update_count)
 
+      update_count = 0
       vim.api.nvim_buf_set_lines(buf, 0, 0, false, { "-- edit" })
       helper.wait_for_debounce()
-      assert.is_not_nil(helper.get_virtual_text(buf, 8))
+      assert.equal(1, update_count)
 
       helper.cleanup_buffer(buf)
       vim.fn.delete(path)
