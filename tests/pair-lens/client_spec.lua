@@ -56,6 +56,38 @@ describe("client", function()
     end)
   end)
 
+  describe("rendering", function()
+    it("should pass the opening and closing lines as start_text and end_text", function()
+      require("pair-lens.config").options.style.format = "[{st}] [{et}]"
+      local buf = helper.create_lua_function_buffer()
+
+      assert.same(
+        { { "[if true then] [end]", "Comment" } },
+        helper.get_virtual_text(buf, 6)
+      )
+
+      helper.cleanup_buffer(buf)
+    end)
+
+    it("should show lenses for JSX elements in a javascriptreact buffer", function()
+      local buf = helper.create_test_buffer(
+        table.concat({
+          "const App = () => (",
+          "  <div>",
+          "    <span>a</span>",
+          "    <span>b</span>",
+          "  </div>",
+          ");",
+        }, "\n"),
+        "javascriptreact"
+      )
+
+      assert.is_not_nil(helper.get_virtual_text(buf, 4))
+
+      helper.cleanup_buffer(buf)
+    end)
+  end)
+
   describe("on edit", function()
     it("should update once for a burst of edits", function()
       local buf = helper.create_lua_function_buffer()
