@@ -3,7 +3,7 @@
 [日本語](README.ja.md) | **English**
 
 [![Lua](https://img.shields.io/badge/Lua-blue.svg?style=for-the-badge&logo=lua)](http://www.lua.org)
-[![Neovim](https://img.shields.io/badge/Neovim%200.8+-green.svg?style=for-the-badge&logo=neovim)](https://neovim.io)
+[![Neovim](https://img.shields.io/badge/Neovim%200.10+-green.svg?style=for-the-badge&logo=neovim)](https://neovim.io)
 
 A Neovim plugin that displays information about the corresponding start position at the end of block structures (such as `end`).
 

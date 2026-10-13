@@ -5,6 +5,9 @@ local utils = require("pair-lens.utils")
 local Client = {}
 Client.__index = Client
 
+local UPDATE_DELAY_MS = 100
+local UPDATE_MAX_WAIT_MS = 500
+
 ---@return PairLensClient
 function Client.new()
   local self = setmetatable({}, Client)
@@ -119,11 +122,21 @@ function Client:attach_to_buffer(bufnr)
     self:update_virtual_text_for_buffer(bufnr, parser)
   end
 
+  -- Each update re-renders the whole buffer, so a burst of edits is coalesced
+  -- into one update. The max wait keeps lenses from going stale while edits
+  -- keep arriving.
+  local schedule_update, cancel_updates = utils.debounce(function()
+    if vim.api.nvim_buf_is_valid(bufnr) then
+      update_virtual_text()
+    end
+  end, UPDATE_DELAY_MS, UPDATE_MAX_WAIT_MS)
+
   vim.api.nvim_buf_attach(bufnr, false, {
     on_lines = function()
-      vim.defer_fn(update_virtual_text, 100)
+      schedule_update()
     end,
     on_detach = function()
+      cancel_updates()
       self:clear_buffer(bufnr)
     end,
   })
