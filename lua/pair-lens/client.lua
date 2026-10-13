@@ -5,6 +5,9 @@ local utils = require("pair-lens.utils")
 local Client = {}
 Client.__index = Client
 
+local UPDATE_DELAY_MS = 100
+local UPDATE_MAX_WAIT_MS = 500
+
 ---@return PairLensClient
 function Client.new()
   local self = setmetatable({}, Client)
@@ -128,32 +131,30 @@ function Client:attach_to_buffer(bufnr)
     end
   end
 
-  -- A single timer per buffer coalesces a burst of edits into one update,
-  -- since each update re-renders the whole buffer.
-  local timer = assert(vim.uv.new_timer())
-  local deferred_update = vim.schedule_wrap(function()
+  -- Each update re-renders the whole buffer, so a burst of edits is coalesced
+  -- into one update. The max wait keeps lenses from going stale while edits
+  -- keep arriving.
+  local schedule_update, cancel_updates = utils.debounce(function()
     if vim.api.nvim_buf_is_valid(bufnr) then
       update_virtual_text()
     end
-  end)
-
-  local function schedule_update()
-    timer:stop()
-    timer:start(100, 0, deferred_update)
-  end
+  end, UPDATE_DELAY_MS, UPDATE_MAX_WAIT_MS)
 
   vim.api.nvim_buf_attach(bufnr, false, {
-    on_lines = schedule_update,
+    on_lines = function()
+      schedule_update()
+    end,
     -- Without on_reload, reloading the file from disk detaches this callback.
-    on_reload = schedule_update,
+    on_reload = function()
+      schedule_update()
+    end,
     on_detach = function()
-      timer:stop()
-      timer:close()
+      cancel_updates()
       self:clear_buffer(bufnr)
     end,
   })
 
-  self.buffers[bufnr] = { update = update_virtual_text }
+  self.buffers[bufnr] = { update = update_virtual_text, schedule_update = schedule_update }
   update_virtual_text()
 end
 

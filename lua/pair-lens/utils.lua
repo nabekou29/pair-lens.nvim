@@ -58,20 +58,45 @@ function M.log_debug(...)
   end
 end
 
+---Calls `fn` once `delay` ms have passed without another call. With `max_wait`,
+---a continuous stream of calls still runs `fn` at least every `max_wait` ms.
 ---@param fn function
 ---@param delay number
----@return function
-function M.debounce(fn, delay)
-  local timer = nil
-  return function(...)
-    local args = { ... }
-    if timer then
-      timer:stop()
+---@param max_wait? number
+---@return function debounced
+---@return function close Cancels a pending call and releases the timer
+function M.debounce(fn, delay, max_wait)
+  local timer = assert(vim.uv.new_timer())
+  local first_call_at = nil
+  local args = {}
+
+  local function debounced(...)
+    args = { ... }
+    local now = vim.uv.now()
+    first_call_at = first_call_at or now
+
+    local wait = delay
+    if max_wait then
+      wait = math.max(0, math.min(delay, first_call_at + max_wait - now))
     end
-    timer = vim.defer_fn(function()
-      fn(unpack(args))
-    end, delay)
+
+    timer:stop()
+    timer:start(wait, 0, function()
+      first_call_at = nil
+      vim.schedule(function()
+        fn(unpack(args))
+      end)
+    end)
   end
+
+  local function close()
+    timer:stop()
+    if not timer:is_closing() then
+      timer:close()
+    end
+  end
+
+  return debounced, close
 end
 
 ---@param cursor_line number
