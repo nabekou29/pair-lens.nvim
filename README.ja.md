@@ -3,7 +3,7 @@
 **日本語** | [English](README.md)
 
 [![Lua](https://img.shields.io/badge/Lua-blue.svg?style=for-the-badge&logo=lua)](http://www.lua.org)
-[![Neovim](https://img.shields.io/badge/Neovim%200.8+-green.svg?style=for-the-badge&logo=neovim)](https://neovim.io)
+[![Neovim](https://img.shields.io/badge/Neovim%200.10+-green.svg?style=for-the-badge&logo=neovim)](https://neovim.io)
 
 ブロック構造の終端（`end` など）に、対応する開始位置の情報を表示する Neovim プラグインです。
 
