@@ -35,15 +35,37 @@ describe("client", function()
       helper.cleanup_buffer(buf)
     end)
 
-    it("should skip the pending update when the buffer is wiped out", function()
+    it("should update at least every max wait while edits keep coming", function()
       local buf = helper.create_lua_function_buffer()
       update_count = 0
 
+      -- About 1.2s of edits, each sooner than the debounce delay
+      for i = 1, 24 do
+        vim.api.nvim_buf_set_lines(buf, 0, 0, false, { "-- " .. i })
+        vim.wait(50)
+      end
+
+      assert.is_true(update_count >= 2, "updates: " .. update_count)
+
+      helper.cleanup_buffer(buf)
+    end)
+
+    it("should skip the pending update when the buffer is wiped out", function()
+      local buf = helper.create_lua_function_buffer()
+      update_count = 0
+      vim.v.errmsg = ""
+
       vim.api.nvim_buf_set_lines(buf, 0, 0, false, { "-- edit" })
+      -- Process only fast events, so the timer fires and queues the update,
+      -- but the update itself runs only after the buffer is wiped out.
+      vim.wait(150, function()
+        return false
+      end, 10, true)
       helper.cleanup_buffer(buf)
       helper.wait_for_debounce()
 
       assert.equal(0, update_count)
+      assert.equal("", vim.v.errmsg)
     end)
   end)
 end)
