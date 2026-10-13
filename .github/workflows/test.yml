@@ -38,7 +38,7 @@ jobs:
         with:
           path: .tests
           # 月に一度のキャッシュクリア
-          key: ${{ runner.os }}-plugins-${{ hashFiles('tests/busted.lua') }}-${{ steps.get_date.outputs.year_month }}
+          key: ${{ runner.os }}-plugins-${{ hashFiles('tests/busted.lua', 'lua/pair-lens/queries.lua') }}-${{ steps.get_date.outputs.year_month }}
 
       - name: setup neovim
         uses: rhysd/action-setup-vim@febef33995d6649302e9d88dda81e071b68f16a7 # v1
