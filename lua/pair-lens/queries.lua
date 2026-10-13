@@ -1,6 +1,6 @@
 local M = {}
 
-local javascript = [[
+local ecmascript = [[
   (function_declaration) @function
   (class_declaration) @class
   (method_definition) @method
@@ -12,22 +12,20 @@ local javascript = [[
   (lexical_declaration) @declaration
 ]]
 
-local typescript = javascript .. [[
+-- The javascript parser also parses JSX, so .jsx files use the javascript query.
+local jsx_elements = [[
+  (jsx_element) @jsx_element
+  (jsx_opening_element) @jsx_opening_element
+]]
+
+local javascript = ecmascript .. jsx_elements
+
+local typescript = ecmascript .. [[
   (interface_declaration) @interface
   (object_type) @object
 ]]
 
-local jsx = javascript
-  .. [[
-  (jsx_element) @jsx_element
-  (jsx_opening_element) @jsx_opening_element
-]]
-
-local tsx = typescript
-  .. [[
-  (jsx_element) @jsx_element
-  (jsx_opening_element) @jsx_opening_element
-]]
+local tsx = typescript .. jsx_elements
 
 local json = [[
   (pair) @pair
@@ -47,7 +45,6 @@ M.default_queries = {
 
   javascript = javascript,
   typescript = typescript,
-  jsx = jsx,
   tsx = tsx,
   json = json,
   jsonc = jsonc,
