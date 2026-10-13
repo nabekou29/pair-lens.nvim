@@ -280,13 +280,11 @@ function Client:format_virtual_text(node_info, format_config)
     line_count = node_info.line_count,
   }
 
-  -- Replace via a function in a single pass: a string replacement would treat
+  -- Replace via a table in a single pass: a string replacement would treat
   -- "%" in the source text as a capture reference, and later passes would
-  -- expand placeholders that appear in the inserted source text.
-  local text = format:gsub("{([%w_]+)}", function(key)
-    local value = values[key]
-    return value ~= nil and tostring(value) or nil
-  end)
+  -- expand placeholders that appear in the inserted source text. Unknown
+  -- placeholders are left as is.
+  local text = format:gsub("{([%w_]+)}", values)
 
   return text
 end

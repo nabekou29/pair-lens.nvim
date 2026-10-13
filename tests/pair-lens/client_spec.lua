@@ -31,6 +31,21 @@ describe("client", function()
       }, { format = "(:{sl}-{el}) {st}", hl = "Comment" })
     end
 
+    it("should replace every placeholder and keep unknown ones", function()
+      local text = client:format_virtual_text({
+        start_line = 1,
+        end_line = 10,
+        start_text = "do",
+        end_text = "end",
+        line_count = 10,
+      }, {
+        format = "{sl}{start_line} {el}{end_line} {st}{start_text} {et}{end_text} {lc}{line_count} {x}",
+        hl = "Comment",
+      })
+
+      assert.equal("11 1010 dodo endend 1010 {x}", text)
+    end)
+
     it("should keep % in the source text as is", function()
       assert.equal("(:1-10) if i%2 == 0 {", format("if i%2 == 0 {"))
       assert.equal("(:1-10) // 0-100% complete", format("// 0-100% complete"))
