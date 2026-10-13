@@ -69,6 +69,25 @@ describe("client", function()
       helper.cleanup_buffer(buf)
     end)
 
+    it("should show lenses for named and local Lua functions", function()
+      local buf = helper.create_test_buffer(
+        table.concat({
+          "function f()",
+          "  return 1",
+          "end",
+          "local function g()",
+          "  return 2",
+          "end",
+        }, "\n"),
+        "lua"
+      )
+
+      assert.is_not_nil(helper.get_virtual_text(buf, 2))
+      assert.is_not_nil(helper.get_virtual_text(buf, 5))
+
+      helper.cleanup_buffer(buf)
+    end)
+
     it("should show lenses for JSX elements in a javascriptreact buffer", function()
       local buf = helper.create_test_buffer(
         table.concat({

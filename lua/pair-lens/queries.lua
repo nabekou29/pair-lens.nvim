@@ -35,6 +35,7 @@ local jsonc = json
 
 M.default_queries = {
   lua = [[
+    (function_declaration) @function
     (function_definition) @function
     (if_statement) @if
     (for_statement) @for
