@@ -72,6 +72,9 @@ function M.debounce(fn, delay, max_wait)
 
   local function debounced(...)
     args = { ... }
+    -- The loop time is cached and goes stale while the main loop is busy (e.g.
+    -- running a slow `fn`), which would shorten the delay. Refresh it first.
+    vim.uv.update_time()
     local now = vim.uv.now()
     first_call_at = first_call_at or now
 
