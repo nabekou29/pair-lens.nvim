@@ -22,12 +22,11 @@ function Client:setup()
   self:create_commands()
 end
 
----@param node TSNode
 ---@param bufnr number
+---@param row number
 ---@return string
-local function get_line_text(node, bufnr)
-  local start_row = node:start()
-  local line = vim.api.nvim_buf_get_lines(bufnr, start_row, start_row + 1, false)[1]
+local function get_line_text(bufnr, row)
+  local line = vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1]
   return vim.trim(line or "")
 end
 
@@ -64,8 +63,8 @@ function Client:update_virtual_text_for_buffer(bufnr, parser)
       local node_info = {
         start_line = start_row + 1,
         end_line = end_row + 1,
-        start_text = get_line_text(node, bufnr),
-        end_text = get_line_text(node, bufnr),
+        start_text = get_line_text(bufnr, start_row),
+        end_text = get_line_text(bufnr, end_row),
         line_count = lines_between,
       }
 
@@ -267,17 +266,24 @@ function Client:format_virtual_text(node_info, format_config)
     return format(node_info)
   end
 
-  local text = format
-  text = text:gsub("{sl}", tostring(node_info.start_line))
-  text = text:gsub("{start_line}", tostring(node_info.start_line))
-  text = text:gsub("{el}", tostring(node_info.end_line))
-  text = text:gsub("{end_line}", tostring(node_info.end_line))
-  text = text:gsub("{st}", node_info.start_text)
-  text = text:gsub("{start_text}", node_info.start_text)
-  text = text:gsub("{et}", node_info.end_text)
-  text = text:gsub("{end_text}", node_info.end_text)
-  text = text:gsub("{lc}", tostring(node_info.line_count))
-  text = text:gsub("{line_count}", tostring(node_info.line_count))
+  local values = {
+    sl = node_info.start_line,
+    start_line = node_info.start_line,
+    el = node_info.end_line,
+    end_line = node_info.end_line,
+    st = node_info.start_text,
+    start_text = node_info.start_text,
+    et = node_info.end_text,
+    end_text = node_info.end_text,
+    lc = node_info.line_count,
+    line_count = node_info.line_count,
+  }
+
+  -- Replace via a table in a single pass: a string replacement would treat
+  -- "%" in the source text as a capture reference, and later passes would
+  -- expand placeholders that appear in the inserted source text. Unknown
+  -- placeholders are left as is.
+  local text = format:gsub("{([%w_]+)}", values)
 
   return text
 end
