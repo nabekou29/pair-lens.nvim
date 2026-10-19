@@ -9,37 +9,57 @@ on:
       - opened
       - synchronize
     paths:
-      - ".github/workflows/test.yaml"
+      - ".github/workflows/test.yml"
       - "Makefile"
       - "lua/**"
       - "tests/**"
+
+permissions:
+  contents: read
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
-      - uses: leafo/gh-actions-lua@v11
-      - uses: leafo/gh-actions-luarocks@v5
+      - uses: leafo/gh-actions-lua@8aace3457a2fcf3f3c4e9007ecc6b869ff6d74d6 # v11
+      - uses: leafo/gh-actions-luarocks@4c082a5fad45388feaeb0798dbd82dbd7dc65bca # v5
 
       - name: get year month
         id: get_date
         run: echo "year_month=$(date +'%Y%m')" >> $GITHUB_OUTPUT
 
       - name: plugins cache
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .tests
           # 月に一度のキャッシュクリア
-          key: ${{ runner.os }}-plugins-${{ hashFiles('tests/busted.lua') }}-${{ steps.get_date.outputs.year_month }}
+          key: ${{ runner.os }}-plugins-${{ hashFiles('tests/busted.lua', 'lua/pair-lens/queries.lua') }}-${{ steps.get_date.outputs.year_month }}
 
       - name: setup neovim
-        uses: rhysd/action-setup-vim@v1
+        uses: rhysd/action-setup-vim@febef33995d6649302e9d88dda81e071b68f16a7 # v1
         with:
           neovim: true
           version: nightly
+
+      # nvim-treesitter builds parsers with the tree-sitter CLI. Use a pinned release
+      # binary verified by checksum (nvim-treesitter advises against the npm package).
+      - name: setup tree-sitter cli
+        env:
+          TREE_SITTER_VERSION: v0.27.1
+          TREE_SITTER_SHA256: d01042f94ba3d6827ddc9788e235f75d8366431be42bdf90ade534d960c98b7d
+        run: |
+          curl -fsSL -o tree-sitter.gz "https://github.com/tree-sitter/tree-sitter/releases/download/${TREE_SITTER_VERSION}/tree-sitter-linux-x64.gz"
+          echo "${TREE_SITTER_SHA256}  tree-sitter.gz" | sha256sum --check --strict
+          mkdir -p "$HOME/.local/bin"
+          gunzip -c tree-sitter.gz > "$HOME/.local/bin/tree-sitter"
+          chmod +x "$HOME/.local/bin/tree-sitter"
+          rm tree-sitter.gz
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: run tests
         run: make test
