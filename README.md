@@ -92,7 +92,7 @@ require("pair-lens").setup({
     --   (if_statement) @if
     -- ]],
   },
-  -- Minimum number of lines to display (default: 5)
+  -- Minimum number of lines to display (default: 6)
   -- Virtual text will not be displayed if the number of lines from start to end is less than this value
   min_lines = 6,
 })
